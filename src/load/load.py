@@ -22,7 +22,7 @@ def parse_args():
     help='the artsy environment of the Kubernetes cluster'
   )
   parser.add_argument(
-    'artsy_project',
+    'project',
     help='artsy project name'
   )
   parser.add_argument(
@@ -60,9 +60,9 @@ def validate(env, vault_host, vault_port, secrets_file):
 if __name__ == "__main__":
 
   args = parse_args()
-  env, artsy_project, loglevel = (
+  env, project, loglevel = (
     args.env,
-    args.artsy_project,
+    args.project,
     args.loglevel,
   )
 
@@ -72,4 +72,4 @@ if __name__ == "__main__":
 
   validate(env, vault_host, vault_port, secrets_file)
 
-  load_secrets(artsy_project, vault_host, vault_port, secrets_file, kvv2_mount_point)
+  load_secrets(project, vault_host, vault_port, secrets_file, kvv2_mount_point)

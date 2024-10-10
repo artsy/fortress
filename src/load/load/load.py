@@ -10,17 +10,17 @@ from lib.util import (
 from lib.vault import Vault
 
 
-def load_secrets(artsy_project, vault_host, vault_port, secrets_file, kvv2_mount_point):
+def load_secrets(project, vault_host, vault_port, secrets_file, kvv2_mount_point):
   ''' load secrets from  Vault and write them to a file '''
   logging.debug(f'Loading secrets from {vault_host}:{vault_port} under {kvv2_mount_point}')
 
-  path = f'kubernetes/apps/{artsy_project}/'
+  path = f'kubernetes/apps/{project}/'
 
   vault_client = Vault(
     url_host_port(vault_host, vault_port),
     auth_method='kubernetes',
 #    auth_method='iam',
-    role=artsy_project,
+    role=project,
     kvv2_mount_point=kvv2_mount_point,
     path=path,
   )
