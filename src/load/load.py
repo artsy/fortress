@@ -7,7 +7,7 @@ import load.context
 from load.load import load_secrets
 from lib.logging import setup_logging
 from lib.validations import (
-  hostname_agrees_with_artsy_environment
+  hostname_agrees_with_environment
 )
 
 
@@ -17,13 +17,13 @@ def parse_args():
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
   )
   parser.add_argument(
-    'artsy_env',
+    'env',
     choices=['staging', 'production'],
     help='the artsy environment of the Kubernetes cluster'
   )
   parser.add_argument(
     'artsy_project',
-    help='artsy project'
+    help='artsy project name'
   )
   parser.add_argument(
     '--loglevel',
@@ -42,7 +42,7 @@ def parse_env():
 
   return vault_host, vault_port, kvv2_mount_point, secrets_file
 
-def validate(artsy_env, vault_host, vault_port, secrets_file):
+def validate(env, vault_host, vault_port, secrets_file):
   ''' validate config obtained from env and command line '''
   if not (vault_host and vault_port and secrets_file):
     raise Exception(
@@ -51,17 +51,17 @@ def validate(artsy_env, vault_host, vault_port, secrets_file):
       "VAULT_PORT, " +
       "SECRETS_FILE"
     )
-  if not hostname_agrees_with_artsy_environment(vault_host, artsy_env):
+  if not hostname_agrees_with_environment(vault_host, env):
     raise Exception(
-      f'Hostname {vault_host} does not agree with environment {artsy_env}'
+      f'Hostname {vault_host} does not agree with environment {env}'
     )
 
 
 if __name__ == "__main__":
 
   args = parse_args()
-  artsy_env, artsy_project, loglevel = (
-    args.artsy_env,
+  env, artsy_project, loglevel = (
+    args.env,
     args.artsy_project,
     args.loglevel,
   )
@@ -70,6 +70,6 @@ if __name__ == "__main__":
 
   vault_host, vault_port, kvv2_mount_point, secrets_file = parse_env()
 
-  validate(artsy_env, vault_host, vault_port, secrets_file)
+  validate(env, vault_host, vault_port, secrets_file)
 
   load_secrets(artsy_project, vault_host, vault_port, secrets_file, kvv2_mount_point)
