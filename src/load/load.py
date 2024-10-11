@@ -17,6 +17,12 @@ def parse_args():
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
   )
   parser.add_argument(
+    'auth',
+    choices=['iam', 'kubernetes', 'token'],
+    default='kubernetes',
+    help='the method to use for authenticating with Vault (default kubernetes)'
+  )
+  parser.add_argument(
     'env',
     choices=['staging', 'production'],
     help='the artsy environment of the Kubernetes cluster'
@@ -60,7 +66,8 @@ def validate(env, vault_host, vault_port, secrets_file):
 if __name__ == "__main__":
 
   args = parse_args()
-  env, project, loglevel = (
+  auth, env, project, loglevel = (
+    args.auth,
     args.env,
     args.project,
     args.loglevel,
@@ -72,4 +79,4 @@ if __name__ == "__main__":
 
   validate(env, vault_host, vault_port, secrets_file)
 
-  load_secrets(project, vault_host, vault_port, secrets_file, kvv2_mount_point)
+  load_secrets(project, vault_host, vault_port, auth, secrets_file, kvv2_mount_point)
