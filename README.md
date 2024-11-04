@@ -6,3 +6,5 @@ The script is run in a Kubernetes Init Container for [Artsy apps](https://github
 
 * __Point People:__ [#product-sapphire][sapphire_channel]
 
+
+[sapphire_channel]: https://artsy.slack.com/messages/product-sapphire "#product-sapphire Slack Channel"
