@@ -20,7 +20,12 @@ def parse_args():
     'auth',
     choices=['iam', 'kubernetes', 'token'],
     default='kubernetes',
-    help='the method to use for authenticating with Vault (default kubernetes)'
+    help='the method to use for authenticating with Vault (default: kubernetes)'
+  )
+  parser.add_argument(
+    '--role',
+    default=None,
+    help='the Vault role to authenticate as (default: None)'
   )
   parser.add_argument(
     'env',
@@ -66,8 +71,9 @@ def validate(env, vault_host, vault_port, secrets_file):
 if __name__ == "__main__":
 
   args = parse_args()
-  auth, env, project, loglevel = (
+  auth, role, env, project, loglevel = (
     args.auth,
+    args.role,
     args.env,
     args.project,
     args.loglevel,
@@ -79,4 +85,4 @@ if __name__ == "__main__":
 
   validate(env, vault_host, vault_port, secrets_file)
 
-  load_secrets(project, vault_host, vault_port, auth, secrets_file, kvv2_mount_point)
+  load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2_mount_point)
