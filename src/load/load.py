@@ -13,6 +13,9 @@ from lib.validations import (
 )
 
 
+ENV = os.environ.get('ENV')
+
+
 def parse_args():
   ''' parse command line args '''
   parser = argparse.ArgumentParser(
@@ -48,9 +51,10 @@ def parse_args():
 
 def parse_env():
   ''' parse env vars '''
-  # for local dev, no error if file does not exist
-  load_dotenv('.env.shared')
-  load_dotenv('.env', override=True)
+  # load env files for local dev
+  if ENV == 'development':
+    load_dotenv('.env.shared')
+    load_dotenv('.env', override=True)
 
   vault_host = os.environ.get('VAULT_HOST')
   vault_port = os.environ.get('VAULT_PORT')

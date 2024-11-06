@@ -18,7 +18,7 @@ Read and run the setup script:
 
 To run the script for hokusai-sandbox test project:
 ```
-python src/load/load.py iam staging hokusai-sandbox
+ENV=development python src/load/load.py iam staging hokusai-sandbox
 ```
 
 ## Testing
