@@ -37,5 +37,5 @@ if [ ! -e ".env" ]; then
   cp .env.example .env
 fi
 
-echo "Adding pre-commit hook..."
-cp bin/pre-commit .git/hooks/pre-commit
+echo "Installing pre-commit..."
+pre-commit install
