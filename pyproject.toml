@@ -8,6 +8,7 @@ authors = ["Artsy Product Sapphire Team <sapphire@artsymail.com>"]
 boto3 = "^1.26.61"
 python = ">=3.9,<3.11"
 hvac = "^1.2.1"
+python-dotenv = "^1.0.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.2.1"

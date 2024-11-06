@@ -16,10 +16,9 @@ Read and run the setup script:
 
 ## Run Script
 
-To run the script with environment files loaded (using [Foreman](https://github.com/ddollar/foreman)):
-
+To run the script for hokusai-sandbox test project:
 ```
-foreman run --env .env.shared,.env python src/load/load.py iam staging hokusai-sandbox
+python src/load/load.py iam staging hokusai-sandbox
 ```
 
 ## Testing

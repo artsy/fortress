@@ -2,6 +2,8 @@ import argparse
 import logging
 import os
 
+from dotenv import load_dotenv
+
 import load.context
 
 from load.load import load_secrets
@@ -46,6 +48,10 @@ def parse_args():
 
 def parse_env():
   ''' parse env vars '''
+  # for local dev, no error if file does not exist
+  load_dotenv('.env.shared')
+  load_dotenv('.env', override=True)
+
   vault_host = os.environ.get('VAULT_HOST')
   vault_port = os.environ.get('VAULT_PORT')
   kvv2_mount_point = os.environ.get('VAULT_KVV2_MOUNT_POINT')
