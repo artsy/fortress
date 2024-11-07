@@ -6,6 +6,9 @@ RUN chown deploy:deploy /src
 
 RUN pip --no-cache-dir install poetry
 
+RUN apk --no-cache --quiet add \
+  make
+
 WORKDIR /src
 
 COPY pyproject.toml poetry.lock /src/
