@@ -17,14 +17,10 @@ class Vault:
     role=None,
     kvv2_mount_point=None,
     path=None,
-    sanitizer=None
   ):
     self._client = hvac.Client(url=addr)
     self._mount_point = kvv2_mount_point
     self._path = path
-    # a function for sanitizing a value before setting it in Vault
-    # this is org-specific
-    self._sanitizer = sanitizer
     self._login(auth_method, token, role)
 
   def _login(self, auth_method, token=None, role=None):

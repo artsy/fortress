@@ -10,7 +10,7 @@ from lib.util import (
 from lib.vault import Vault
 
 
-def load_secrets(project, vault_host, vault_port, auth, secrets_file, kvv2_mount_point):
+def load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2_mount_point):
   ''' load secrets from  Vault and write them to a file '''
   logging.debug(f'Loading secrets from {vault_host}:{vault_port} under {kvv2_mount_point}')
 
@@ -19,7 +19,7 @@ def load_secrets(project, vault_host, vault_port, auth, secrets_file, kvv2_mount
   vault_client = Vault(
     url_host_port(vault_host, vault_port),
     auth_method=auth,
-    role=project,
+    role=role,
     kvv2_mount_point=kvv2_mount_point,
     path=path,
   )

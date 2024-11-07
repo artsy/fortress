@@ -2,6 +2,8 @@ import argparse
 import logging
 import os
 
+from dotenv import load_dotenv
+
 import load.context
 
 from load.load import load_secrets
@@ -9,6 +11,9 @@ from lib.logging import setup_logging
 from lib.validations import (
   hostname_agrees_with_environment
 )
+
+
+ENV = os.environ.get('ENV')
 
 
 def parse_args():
@@ -20,7 +25,12 @@ def parse_args():
     'auth',
     choices=['iam', 'kubernetes', 'token'],
     default='kubernetes',
-    help='the method to use for authenticating with Vault (default kubernetes)'
+    help='the method to use for authenticating with Vault (default: kubernetes)'
+  )
+  parser.add_argument(
+    '--role',
+    default=None,
+    help='the Vault role to authenticate as (default: None)'
   )
   parser.add_argument(
     'env',
@@ -41,6 +51,11 @@ def parse_args():
 
 def parse_env():
   ''' parse env vars '''
+  # load env files for local dev
+  if ENV == 'development':
+    load_dotenv('.env.shared')
+    load_dotenv('.env', override=True)
+
   vault_host = os.environ.get('VAULT_HOST')
   vault_port = os.environ.get('VAULT_PORT')
   kvv2_mount_point = os.environ.get('VAULT_KVV2_MOUNT_POINT')
@@ -66,8 +81,9 @@ def validate(env, vault_host, vault_port, secrets_file):
 if __name__ == "__main__":
 
   args = parse_args()
-  auth, env, project, loglevel = (
+  auth, role, env, project, loglevel = (
     args.auth,
+    args.role,
     args.env,
     args.project,
     args.loglevel,
@@ -79,4 +95,4 @@ if __name__ == "__main__":
 
   validate(env, vault_host, vault_port, secrets_file)
 
-  load_secrets(project, vault_host, vault_port, auth, secrets_file, kvv2_mount_point)
+  load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2_mount_point)

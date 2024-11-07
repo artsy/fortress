@@ -1,4 +1,3 @@
-!.env.example
 *.egg
 *.egg-info/
 *.log
@@ -28,10 +27,12 @@
 .coverage
 .env
 .env.*
+!.env.example
 .env/
 .hokusai-tmp
 .idea
 .installed.cfg
+.python-version
 .ropeproject
 .tox/
 .venv/
