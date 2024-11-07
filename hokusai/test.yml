@@ -1,0 +1,7 @@
+---
+version: '2'
+services:
+  fortress:
+    command: ["sh", "-c", "make test"]
+    build:
+      context: ../

@@ -1,0 +1,9 @@
+---
+version: '2'
+services:
+  fortress:
+    env_file:
+      - ../.env.shared
+      - ../.env
+    build:
+      context: ../
