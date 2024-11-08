@@ -4,8 +4,6 @@ import logging
 
 from hvac.api.auth_methods import Kubernetes
 
-from lib.export_backup import write_file
-
 
 class Vault:
   ''' Interface with Hashicorp Vault '''
