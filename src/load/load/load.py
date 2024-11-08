@@ -4,9 +4,6 @@ import hvac
 
 import load.context
 
-from lib.util import (
-  url_host_port
-)
 from lib.vault import Vault
 
 
@@ -17,7 +14,7 @@ def load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2
   path = f'kubernetes/apps/{project}/'
 
   vault_client = Vault(
-    url_host_port(vault_host, vault_port),
+    f'https://{vault_host}:{vault_port}',
     auth_method=auth,
     role=role,
     kvv2_mount_point=kvv2_mount_point,
