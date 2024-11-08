@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  PLACEHOLDER: placeholder
+kind: ConfigMap
+metadata:
+  labels:
+    app: fortress
+  name: fortress-environment
+  namespace: default
