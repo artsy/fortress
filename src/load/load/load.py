@@ -7,7 +7,7 @@ import load.context
 from lib.vault import Vault
 
 
-def load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2_mount_point):
+def load_secrets(project, vault_host, vault_port, auth, role, sa_token_path, secrets_file, kvv2_mount_point):
   ''' load secrets from  Vault and write them to a file '''
   logging.debug(f'Loading secrets from {vault_host}:{vault_port} under {kvv2_mount_point}')
 
@@ -24,7 +24,7 @@ def load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2
     vault_client.iam_login(role)
   elif auth == 'kubernetes':
     role = project
-    vault_client.kubernetes_login(role)
+    vault_client.kubernetes_login(role, sa_token_path)
 
   keys = vault_client.list()['data']['keys']
 

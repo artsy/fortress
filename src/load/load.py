@@ -20,27 +20,32 @@ def parse_args():
   parser.add_argument(
     'auth',
     choices=['iam', 'kubernetes'],
-    help='the method to use for authenticating with Vault (default: kubernetes)'
+    help='the method to use for authenticating with Vault'
   )
   parser.add_argument(
     'env',
     choices=['staging', 'production'],
-    help='the artsy environment of the Kubernetes cluster'
+    help='the environment of the Kubernetes cluster'
   )
   parser.add_argument(
     'project',
-    help='artsy project name'
+    help='the name of the project to fetch secrets from  Vault for'
   )
   parser.add_argument(
     '--role',
     default=None,
-    help='the Vault role to authenticate as (default: None)'
+    help='the Vault role to authenticate as'
+  )
+  parser.add_argument(
+    '--sa-token-path',
+    default='/var/run/secrets/kubernetes.io/serviceaccount/token',
+    help='for Kubernetes auth, the file path to Kubernetes service account token inside the pod'
   )
   parser.add_argument(
     '--loglevel',
     choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
     default='INFO',
-    help='log level'
+    help='logging level'
   )
   return parser.parse_args()
 
@@ -72,11 +77,12 @@ def validate(vault_host, vault_port, secrets_file):
 if __name__ == "__main__":
 
   args = parse_args()
-  auth, role, env, project, loglevel = (
+  auth, env, project, role, sa_token_path, loglevel = (
     args.auth,
-    args.role,
     args.env,
     args.project,
+    args.role,
+    args.sa_token_path,
     args.loglevel,
   )
 
@@ -88,4 +94,4 @@ if __name__ == "__main__":
 
   validate(vault_host, vault_port, secrets_file)
 
-  load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2_mount_point)
+  load_secrets(project, vault_host, vault_port, auth, role, sa_token_path, secrets_file, kvv2_mount_point)

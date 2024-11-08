@@ -31,11 +31,13 @@ class Vault:
       role=role
     )
 
-  def kubernetes_login(self, role=None):
+  def kubernetes_login(self, role=None, sa_token_path=None):
     ''' authenticate using k8s pod service account token '''
-    if role == None:
-      raise Exception('Vault Kubernetes login requires a role.')
-    with open('/var/run/secrets/kubernetes.io/serviceaccount/token') as token_file:
+    if role == None or sa_token_path == None:
+      raise Exception(
+        'Vault Kubernetes login requires a role and Kubernetes pod service account token path.'
+      )
+    with open(sa_token_path) as token_file:
       jwt = token_file.read()
     Kubernetes(self._client.adapter).login(role=role, jwt=jwt)
 
