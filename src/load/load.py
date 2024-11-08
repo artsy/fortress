@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 import load.context
 
 from load.load import load_secrets
-from lib.logging import setup_logging
 
 
 ENV = os.environ.get('ENV')
@@ -82,7 +81,9 @@ if __name__ == "__main__":
     args.loglevel,
   )
 
-  setup_logging(eval('logging.' + loglevel))
+  logging.basicConfig(
+    level=eval(f'logging.{loglevel}')
+  )
 
   vault_host, vault_port, kvv2_mount_point, secrets_file = parse_env()
 
