@@ -8,9 +8,6 @@ import load.context
 
 from load.load import load_secrets
 from lib.logging import setup_logging
-from lib.validations import (
-  hostname_agrees_with_environment
-)
 
 
 ENV = os.environ.get('ENV')
@@ -63,7 +60,7 @@ def parse_env():
 
   return vault_host, vault_port, kvv2_mount_point, secrets_file
 
-def validate(env, vault_host, vault_port, secrets_file):
+def validate(vault_host, vault_port, secrets_file):
   ''' validate config obtained from env and command line '''
   if not (vault_host and vault_port and secrets_file):
     raise Exception(
@@ -71,10 +68,6 @@ def validate(env, vault_host, vault_port, secrets_file):
       "VAULT_HOST, " +
       "VAULT_PORT, " +
       "SECRETS_FILE"
-    )
-  if not hostname_agrees_with_environment(vault_host, env):
-    raise Exception(
-      f'Hostname {vault_host} does not agree with environment {env}'
     )
 
 
@@ -93,6 +86,6 @@ if __name__ == "__main__":
 
   vault_host, vault_port, kvv2_mount_point, secrets_file = parse_env()
 
-  validate(env, vault_host, vault_port, secrets_file)
+  validate(vault_host, vault_port, secrets_file)
 
   load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2_mount_point)
