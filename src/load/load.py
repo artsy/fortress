@@ -20,13 +20,7 @@ def parse_args():
   parser.add_argument(
     'auth',
     choices=['iam', 'kubernetes', 'token'],
-    default='kubernetes',
     help='the method to use for authenticating with Vault (default: kubernetes)'
-  )
-  parser.add_argument(
-    '--role',
-    default=None,
-    help='the Vault role to authenticate as (default: None)'
   )
   parser.add_argument(
     'env',
@@ -36,6 +30,11 @@ def parse_args():
   parser.add_argument(
     'project',
     help='artsy project name'
+  )
+  parser.add_argument(
+    '--role',
+    default=None,
+    help='the Vault role to authenticate as (default: None)'
   )
   parser.add_argument(
     '--loglevel',
