@@ -10,52 +10,36 @@ class Vault:
   def __init__(
     self,
     addr,
-    auth_method,
-    token=None,
-    role=None,
     kvv2_mount_point=None,
     path=None,
   ):
     self._client = hvac.Client(url=addr)
     self._mount_point = kvv2_mount_point
     self._path = path
-    self._login(auth_method, token, role)
 
-  def _login(self, auth_method, token=None, role=None):
-    ''' log into Vault using the specified method '''
-    if auth_method == 'iam':
-      self._iam_login(role)
-    elif auth_method == 'token':
-      self._client.token = token
-    elif auth_method == 'kubernetes':
-      self._kubernetes_login(role)
-    else:
-      raise Exception(f'Un-supported auth method: {auth_method}')
+  ## login methods
 
-  def _kubernetes_login(self, role=None):
+  def iam_login(self, role=None):
+    ''' log into Vault using AWS IAM keys '''
+    session = boto3.Session()
+    credentials = session.get_credentials()
+    # if role is None, hvac defaults it to iam username
+    self._client.auth.aws.iam_login(
+      credentials.access_key,
+      credentials.secret_key,
+      credentials.token,
+      role=role
+    )
+
+  def kubernetes_login(self, role=None):
     ''' authenticate using k8s pod service account token '''
+    if role == None:
+      raise Exception('Vault Kubernetes login requires a role.')
     with open('/var/run/secrets/kubernetes.io/serviceaccount/token') as token_file:
       jwt = token_file.read()
     Kubernetes(self._client.adapter).login(role=role, jwt=jwt)
 
-  def _iam_login(self, role=None):
-    ''' log into Vault using AWS IAM keys '''
-    session = boto3.Session()
-    credentials = session.get_credentials()
-    if role == None:
-      # role not specified, let hvac default role to same as iam username
-      self._client.auth.aws.iam_login(
-        credentials.access_key,
-        credentials.secret_key,
-        credentials.token,
-      )
-    else:
-      self._client.auth.aws.iam_login(
-        credentials.access_key,
-        credentials.secret_key,
-        credentials.token,
-        role=role
-      )
+  ##
 
   def get(self, key):
     ''' get an entry '''

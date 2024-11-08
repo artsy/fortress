@@ -19,7 +19,7 @@ def parse_args():
   )
   parser.add_argument(
     'auth',
-    choices=['iam', 'kubernetes', 'token'],
+    choices=['iam', 'kubernetes'],
     help='the method to use for authenticating with Vault (default: kubernetes)'
   )
   parser.add_argument(

@@ -12,14 +12,19 @@ def load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2
   logging.debug(f'Loading secrets from {vault_host}:{vault_port} under {kvv2_mount_point}')
 
   path = f'kubernetes/apps/{project}/'
+  vault_url = f'https://{vault_host}:{vault_port}'
 
   vault_client = Vault(
-    f'https://{vault_host}:{vault_port}',
-    auth_method=auth,
-    role=role,
+    vault_url,
     kvv2_mount_point=kvv2_mount_point,
     path=path,
   )
+
+  if auth == 'iam':
+    vault_client.iam_login(role)
+  elif auth == 'kubernetes':
+    role = project
+    vault_client.kubernetes_login(role)
 
   keys = vault_client.list()['data']['keys']
 
