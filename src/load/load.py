@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 
+from dataclasses import dataclass
 from dotenv import load_dotenv
 
 import load.context
@@ -74,6 +75,15 @@ def validate(vault_host, vault_port, secrets_file):
     )
 
 
+@dataclass(frozen=True)
+class VaultArgs:
+  host: str
+  port: str
+  auth: str
+  role: str
+  kvv2_mount_point: str
+
+
 if __name__ == "__main__":
 
   args = parse_args()
@@ -94,4 +104,12 @@ if __name__ == "__main__":
 
   validate(vault_host, vault_port, secrets_file)
 
-  load_secrets(project, vault_host, vault_port, auth, role, sa_token_path, secrets_file, kvv2_mount_point)
+  vault_args = VaultArgs(
+    vault_host,
+    vault_port,
+    auth,
+    role,
+    kvv2_mount_point
+  )
+
+  load_secrets(vault_args, project, sa_token_path, secrets_file)
