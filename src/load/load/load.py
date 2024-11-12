@@ -3,7 +3,6 @@ import logging
 import hvac
 
 import load.context
-
 from lib.vault import Vault
 
 

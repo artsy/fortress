@@ -1,14 +1,12 @@
 import argparse
 import logging
 import os
-
 from dataclasses import dataclass
+
 from dotenv import load_dotenv
 
 import load.context
-
 from load.load import load_secrets
-
 
 ENV = os.environ.get("ENV")
 

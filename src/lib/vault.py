@@ -1,7 +1,7 @@
-import boto3
-import hvac
 import logging
 
+import boto3
+import hvac
 from hvac.api.auth_methods import Kubernetes
 
 
