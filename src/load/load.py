@@ -1,98 +1,104 @@
 import argparse
 import logging
 import os
+from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
 import load.context
-
 from load.load import load_secrets
-from lib.logging import setup_logging
-from lib.validations import (
-  hostname_agrees_with_environment
-)
 
-
-ENV = os.environ.get('ENV')
+ENV = os.environ.get("ENV")
 
 
 def parse_args():
-  ''' parse command line args '''
-  parser = argparse.ArgumentParser(
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter
-  )
-  parser.add_argument(
-    'auth',
-    choices=['iam', 'kubernetes', 'token'],
-    default='kubernetes',
-    help='the method to use for authenticating with Vault (default: kubernetes)'
-  )
-  parser.add_argument(
-    '--role',
-    default=None,
-    help='the Vault role to authenticate as (default: None)'
-  )
-  parser.add_argument(
-    'env',
-    choices=['staging', 'production'],
-    help='the artsy environment of the Kubernetes cluster'
-  )
-  parser.add_argument(
-    'project',
-    help='artsy project name'
-  )
-  parser.add_argument(
-    '--loglevel',
-    choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-    default='INFO',
-    help='log level'
-  )
-  return parser.parse_args()
+    """parse command line args"""
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "auth",
+        choices=["iam", "kubernetes"],
+        help="the method to use for authenticating with Vault",
+    )
+    parser.add_argument(
+        "env",
+        choices=["staging", "production"],
+        help="the environment of the Kubernetes cluster",
+    )
+    parser.add_argument(
+        "project", help="the name of the project to fetch secrets from  Vault for"
+    )
+    parser.add_argument(
+        "--role", default=None, help="the Vault role to authenticate as"
+    )
+    parser.add_argument(
+        "--sa-token-path",
+        default="/var/run/secrets/kubernetes.io/serviceaccount/token",
+        help="for Kubernetes auth, the file path to Kubernetes service account token inside the pod",
+    )
+    parser.add_argument(
+        "--loglevel",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="INFO",
+        help="logging level",
+    )
+    return parser.parse_args()
+
 
 def parse_env():
-  ''' parse env vars '''
-  # load env files for local dev
-  if ENV == 'development':
-    load_dotenv('.env.shared')
-    load_dotenv('.env', override=True)
+    """parse env vars"""
+    # load env files for local dev
+    if ENV == "development":
+        load_dotenv(".env.shared")
+        load_dotenv(".env", override=True)
 
-  vault_host = os.environ.get('VAULT_HOST')
-  vault_port = os.environ.get('VAULT_PORT')
-  kvv2_mount_point = os.environ.get('VAULT_KVV2_MOUNT_POINT')
-  secrets_file = os.environ.get('SECRETS_FILE', '')
+    vault_host = os.environ.get("VAULT_HOST")
+    vault_port = os.environ.get("VAULT_PORT")
+    kvv2_mount_point = os.environ.get("VAULT_KVV2_MOUNT_POINT")
+    secrets_file = os.environ.get("SECRETS_FILE", "")
 
-  return vault_host, vault_port, kvv2_mount_point, secrets_file
+    return vault_host, vault_port, kvv2_mount_point, secrets_file
 
-def validate(env, vault_host, vault_port, secrets_file):
-  ''' validate config obtained from env and command line '''
-  if not (vault_host and vault_port and secrets_file):
-    raise Exception(
-      "The following environment variables must be specified: " +
-      "VAULT_HOST, " +
-      "VAULT_PORT, " +
-      "SECRETS_FILE"
-    )
-  if not hostname_agrees_with_environment(vault_host, env):
-    raise Exception(
-      f'Hostname {vault_host} does not agree with environment {env}'
-    )
+
+def validate(vault_host, vault_port, secrets_file):
+    """validate config obtained from env and command line"""
+    if not (vault_host and vault_port and secrets_file):
+        raise Exception(
+            "The following environment variables must be specified: "
+            + "VAULT_HOST, "
+            + "VAULT_PORT, "
+            + "SECRETS_FILE"
+        )
+
+
+@dataclass(frozen=True)
+class VaultArgs:
+    host: str
+    port: str
+    auth: str
+    role: str
+    kvv2_mount_point: str
 
 
 if __name__ == "__main__":
 
-  args = parse_args()
-  auth, role, env, project, loglevel = (
-    args.auth,
-    args.role,
-    args.env,
-    args.project,
-    args.loglevel,
-  )
+    args = parse_args()
+    auth, env, project, role, sa_token_path, loglevel = (
+        args.auth,
+        args.env,
+        args.project,
+        args.role,
+        args.sa_token_path,
+        args.loglevel,
+    )
 
-  setup_logging(eval('logging.' + loglevel))
+    logging.basicConfig(level=eval(f"logging.{loglevel}"))
 
-  vault_host, vault_port, kvv2_mount_point, secrets_file = parse_env()
+    vault_host, vault_port, kvv2_mount_point, secrets_file = parse_env()
 
-  validate(env, vault_host, vault_port, secrets_file)
+    validate(vault_host, vault_port, secrets_file)
 
-  load_secrets(project, vault_host, vault_port, auth, role, secrets_file, kvv2_mount_point)
+    vault_args = VaultArgs(vault_host, vault_port, auth, role, kvv2_mount_point)
+
+    load_secrets(vault_args, project, sa_token_path, secrets_file)
