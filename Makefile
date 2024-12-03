@@ -1,2 +1,2 @@
 test:
-	pytest src
+	poetry install --with test && poetry run pytest src
