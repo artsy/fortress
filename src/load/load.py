@@ -3,10 +3,7 @@ import logging
 import os
 from dataclasses import dataclass
 
-from dotenv import load_dotenv
-
-import load.context
-from load.load import load_secrets
+from fortress.lib.vault import Vault
 
 ENV = os.environ.get("ENV")
 
@@ -50,6 +47,8 @@ def parse_env():
     """parse env vars"""
     # load env files for local dev
     if ENV == "development":
+        from dotenv import load_dotenv
+
         load_dotenv(".env.shared")
         load_dotenv(".env", override=True)
 
@@ -79,6 +78,38 @@ class VaultArgs:
     auth: str
     role: str
     kvv2_mount_point: str
+
+
+def load_secrets(vault_args, project, sa_token_path, secrets_file):
+    """load secrets from  Vault and write them to a file"""
+    logging.debug(
+        f"Loading secrets from {vault_args.host}:{vault_args.port} under {vault_args.kvv2_mount_point}"
+    )
+
+    path = f"kubernetes/apps/{project}/"
+    vault_url = f"https://{vault_args.host}:{vault_args.port}"
+
+    vault_client = Vault(
+        vault_url,
+        kvv2_mount_point=vault_args.kvv2_mount_point,
+        path=path,
+    )
+
+    if vault_args.auth == "iam":
+        vault_client.iam_login(vault_args.role)
+    elif vault_args.auth == "kubernetes":
+        role = project
+        vault_client.kubernetes_login(role, sa_token_path)
+
+    keys = vault_client.list()["data"]["keys"]
+
+    logging.debug(f"fetched keys from Vault: {keys}")
+
+    with open(secrets_file, "w") as f:
+        for key in keys:
+            value = vault_client.get(key)
+            if value:
+                f.write(f"export {key}='{value}'\n")
 
 
 if __name__ == "__main__":
