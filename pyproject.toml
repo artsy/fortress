@@ -3,7 +3,6 @@ name = "fortress"
 version = "0.1.0"
 description = "for fetching secrets from Hashicorp Vault"
 authors = ["Artsy Product Sapphire Team <sapphire@artsymail.com>"]
-package-mode = false
 
 [tool.poetry.dependencies]
 boto3 = "^1.26.61"

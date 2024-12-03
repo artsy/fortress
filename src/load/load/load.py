@@ -3,7 +3,7 @@ import logging
 import hvac
 
 import load.context
-from lib.vault import Vault
+from fortress.lib.vault import Vault
 
 
 def load_secrets(vault_args, project, sa_token_path, secrets_file):
