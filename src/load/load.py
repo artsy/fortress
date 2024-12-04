@@ -3,6 +3,8 @@ import logging
 import os
 from dataclasses import dataclass
 
+import hvac
+
 from fortress.lib.vault import Vault
 
 ENV = os.environ.get("ENV")
@@ -107,9 +109,11 @@ def load_secrets(vault_args, project, sa_token_path, secrets_file):
 
     with open(secrets_file, "w") as f:
         for key in keys:
-            value = vault_client.get(key)
-            if value:
+            try:
+                value = vault_client.get(key)
                 f.write(f"export {key}='{value}'\n")
+            except hvac.exceptions.InvalidPath:
+                logging.debug(f"{key} either does not exist or is soft deleted.")
 
 
 if __name__ == "__main__":

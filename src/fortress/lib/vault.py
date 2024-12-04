@@ -45,17 +45,13 @@ class Vault:
         """get an entry"""
         full_path = f"{self._path}{key}"
         logging.debug(f"Vault: getting {full_path}")
-        try:
-            response = self._client.secrets.kv.read_secret_version(
-                path=full_path, mount_point=self._mount_point
-            )
-            # return value of key
-            value = response["data"]["data"][key]
-        except hvac.exceptions.InvalidPath:
-            logging.debug(f"{key} either does not exist or is soft deleted.")
-            return None
-
-        return value
+        # if key does not exist or if data is soft-deleted, it raises:
+        # hvac.exceptions.InvalidPath
+        response = self._client.secrets.kv.read_secret_version(
+            path=full_path, mount_point=self._mount_point
+        )
+        # return value of key
+        return response["data"]["data"][key]
 
     def list(self):
         """list keys under a path"""
