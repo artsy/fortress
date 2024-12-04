@@ -14,7 +14,7 @@ WORKDIR /app
 COPY . /app
 
 RUN poetry config virtualenvs.create false \
-&& poetry install --without dev --with test
+&& poetry install --without dev
 
 USER deploy
 ENV USER deploy
