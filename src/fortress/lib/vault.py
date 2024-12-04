@@ -51,8 +51,7 @@ class Vault:
             path=full_path, mount_point=self._mount_point
         )
         # return value of key
-        value = response["data"]["data"][key]
-        return value
+        return response["data"]["data"][key]
 
     def list(self):
         """list keys under a path"""
