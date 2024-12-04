@@ -85,7 +85,8 @@ class VaultArgs:
 def load_secrets(vault_args, project, sa_token_path, secrets_file):
     """load secrets from  Vault and write them to a file"""
     logging.debug(
-        f"Loading secrets from {vault_args.host}:{vault_args.port} under {vault_args.kvv2_mount_point}"
+        f"Loading secrets from {vault_args.host}:{vault_args.port}"
+        f"under {vault_args.kvv2_mount_point}"
     )
 
     path = f"kubernetes/apps/{project}/"
@@ -129,11 +130,7 @@ if __name__ == "__main__":
     )
 
     logging.basicConfig(level=eval(f"logging.{loglevel}"))
-
     vault_host, vault_port, kvv2_mount_point, secrets_file = parse_env()
-
     validate(vault_host, vault_port, secrets_file)
-
     vault_args = VaultArgs(vault_host, vault_port, auth, role, kvv2_mount_point)
-
     load_secrets(vault_args, project, sa_token_path, secrets_file)
