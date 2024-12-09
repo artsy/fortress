@@ -3,10 +3,9 @@ import logging
 import os
 from dataclasses import dataclass
 
-from dotenv import load_dotenv
+import hvac
 
-import load.context
-from load.load import load_secrets
+from fortress.lib.vault import Vault
 
 ENV = os.environ.get("ENV")
 
@@ -50,6 +49,8 @@ def parse_env():
     """parse env vars"""
     # load env files for local dev
     if ENV == "development":
+        from dotenv import load_dotenv
+
         load_dotenv(".env.shared")
         load_dotenv(".env", override=True)
 
@@ -81,6 +82,41 @@ class VaultArgs:
     kvv2_mount_point: str
 
 
+def load_secrets(vault_args, project, sa_token_path, secrets_file):
+    """load secrets from  Vault and write them to a file"""
+    logging.debug(
+        f"Loading secrets from {vault_args.host}:{vault_args.port} "
+        f"under {vault_args.kvv2_mount_point} mount point."
+    )
+
+    path = f"kubernetes/apps/{project}/"
+    vault_url = f"https://{vault_args.host}:{vault_args.port}"
+
+    vault_client = Vault(
+        vault_url,
+        kvv2_mount_point=vault_args.kvv2_mount_point,
+        path=path,
+    )
+
+    if vault_args.auth == "iam":
+        vault_client.iam_login(vault_args.role)
+    elif vault_args.auth == "kubernetes":
+        role = project
+        vault_client.kubernetes_login(role, sa_token_path)
+
+    keys = vault_client.list()["data"]["keys"]
+
+    logging.debug(f"fetched keys from Vault: {keys}")
+
+    with open(secrets_file, "w") as f:
+        for key in keys:
+            try:
+                value = vault_client.get(key)
+                f.write(f"export {key}='{value}'\n")
+            except hvac.exceptions.InvalidPath:
+                logging.debug(f"{key} either does not exist or is soft deleted.")
+
+
 if __name__ == "__main__":
 
     args = parse_args()
@@ -94,11 +130,7 @@ if __name__ == "__main__":
     )
 
     logging.basicConfig(level=eval(f"logging.{loglevel}"))
-
     vault_host, vault_port, kvv2_mount_point, secrets_file = parse_env()
-
     validate(vault_host, vault_port, secrets_file)
-
     vault_args = VaultArgs(vault_host, vault_port, auth, role, kvv2_mount_point)
-
     load_secrets(vault_args, project, sa_token_path, secrets_file)
